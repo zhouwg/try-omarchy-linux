@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <glib.h>
 #include <qemu-plugin.h>
+#include <errno.h>
 
 QEMU_PLUGIN_EXPORT int qemu_plugin_version = QEMU_PLUGIN_VERSION;
 

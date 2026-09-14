@@ -58,9 +58,12 @@ echo "Configuring QEMU ${QEMU_VERSION}..."
     --enable-opengl \
     --enable-virglrenderer \
     --enable-gtk \
+    --disable-slirp \
     --disable-sdl \
     --disable-docs \
-    --disable-user
+    --disable-user \
+    --disable-plugins \
+    --disable-dbus-display
 
 echo "Building QEMU ${QEMU_VERSION} (this may take a while)..."
 make -j"$(nproc)"

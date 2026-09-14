@@ -93,9 +93,7 @@ EOF
 
 # Auto-detect best settings
 auto_configure() {
-    # Default: no GL (more compatible)
-    # Only enable if user explicitly requests with --gl
-    # Default: std VGA with 256MB (most compatible)
+    # std VGA with 256MB (most compatible)
     DISPLAY_OPT="gtk"
     VGA_DEVICE="-device VGA,vgamem_mb=256"
 }
@@ -109,8 +107,6 @@ build_command() {
         -drive "file=${DISK_FILE},format=qcow2,if=virtio"
         ${VGA_DEVICE}
         -display "${DISPLAY_OPT}"
-        -device virtio-net-pci,netdev=net0
-        -netdev user,id=net0,hostfwd=tcp::2222-:22
         -usb -device usb-tablet
     )
 

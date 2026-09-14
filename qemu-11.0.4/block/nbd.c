@@ -1513,84 +1513,10 @@ static void nbd_client_close(BlockDriverState *bs)
  * Parse nbd_open options
  */
 
+/* Stub: URI parsing requires GLib 2.66+ (disabled for Ubuntu 20.04 compat) */
 static int nbd_parse_uri(const char *filename, QDict *options)
 {
-    g_autoptr(GUri) uri = g_uri_parse(filename, G_URI_FLAGS_NONE, NULL);
-    g_autoptr(GHashTable) qp = NULL;
-    const char *p;
-    int qp_n;
-    bool is_unix;
-    const char *uri_scheme, *uri_query, *uri_server;
-    int uri_port;
-
-    if (!uri) {
-        return -EINVAL;
-    }
-
-    /* transport */
-    uri_scheme = g_uri_get_scheme(uri);
-    if (!g_strcmp0(uri_scheme, "nbd")) {
-        is_unix = false;
-    } else if (!g_strcmp0(uri_scheme, "nbd+tcp")) {
-        is_unix = false;
-    } else if (!g_strcmp0(uri_scheme, "nbd+unix")) {
-        is_unix = true;
-    } else {
-        return -EINVAL;
-    }
-
-    p = g_uri_get_path(uri) ?: "";
-    if (p[0] == '/') {
-        p++;
-    }
-    if (p[0]) {
-        qdict_put_str(options, "export", p);
-    }
-
-    uri_query = g_uri_get_query(uri);
-    if (uri_query) {
-        qp = g_uri_parse_params(uri_query, -1, "&", G_URI_PARAMS_NONE, NULL);
-        if (!qp) {
-            return -EINVAL;
-        }
-        qp_n = g_hash_table_size(qp);
-        if (qp_n > 1 || (is_unix && !qp_n) || (!is_unix && qp_n)) {
-            return -EINVAL;
-        }
-     }
-
-    uri_server = g_uri_get_host(uri);
-    if (uri_server && !uri_server[0]) {
-        uri_server = NULL;
-    }
-    uri_port = g_uri_get_port(uri);
-
-    if (is_unix) {
-        /* nbd+unix:///export?socket=path */
-        const char *uri_socket = g_hash_table_lookup(qp, "socket");
-        if (uri_server || uri_port != -1 || !uri_socket) {
-            return -EINVAL;
-        }
-        qdict_put_str(options, "server.type", "unix");
-        qdict_put_str(options, "server.path", uri_socket);
-    } else {
-        char *port_str;
-
-        /* nbd[+tcp]://host[:port]/export */
-        if (!uri_server) {
-            return -EINVAL;
-        }
-
-        qdict_put_str(options, "server.type", "inet");
-        qdict_put_str(options, "server.host", uri_server);
-
-        port_str = g_strdup_printf("%d", uri_port > 0 ? uri_port
-                                                      : NBD_DEFAULT_PORT);
-        qdict_put_str(options, "server.port", port_str);
-        g_free(port_str);
-    }
-
-    return 0;
+    return -EINVAL;
 }
 
 static bool nbd_has_filename_options_conflict(QDict *options, Error **errp)
