@@ -1,0 +1,14 @@
+# QEMU source and build artifacts
+build-qemu/src/
+build-qemu/build/
+build-qemu/install/
+
+# Virtual disks
+disks/
+
+# ISO files
+iso/
+*.iso
+
+# OVMF firmware
+ovmf/*.fd
