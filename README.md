@@ -1,6 +1,6 @@
 # try-omarchy-linux
 
-Beautiful, Fun & Opinionated Linux on Linux
+Use Omarchy Linux on Linux via QEMU/KVM
 
 ## Quick Start
 
