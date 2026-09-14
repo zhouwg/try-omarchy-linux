@@ -4,20 +4,38 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/versions.conf"
 
-SRC_DIR="${SCRIPT_DIR}/src"
+QEMU_SRC="${SCRIPT_DIR}/../qemu"
 BUILD_DIR="${SCRIPT_DIR}/build"
 INSTALL_DIR="${SCRIPT_DIR}/install"
-EXTRACTED="${SRC_DIR}/qemu-${QEMU_VERSION}"
-BUILD_DIR_QEMU="${BUILD_DIR}/qemu-${QEMU_VERSION}"
 
-if [ ! -d "${EXTRACTED}" ]; then
-    echo "Error: QEMU source not found at ${EXTRACTED}"
+if [ ! -f "${QEMU_SRC}/meson.build" ]; then
+    echo "Error: QEMU source not found at ${QEMU_SRC}"
     echo "Run download.sh first."
     exit 1
 fi
 
 # Check for required dependencies
 echo "Checking build dependencies..."
+
+# Find Python with tomli support
+find_python() {
+    for py in python3.10 python3.11 python3.12 python3 python3.8; do
+        if command -v "$py" &>/dev/null; then
+            if "$py" -c "import tomli" 2>/dev/null; then
+                echo "$py"
+                return 0
+            fi
+        fi
+    done
+    return 1
+}
+
+PYTHON=$(find_python) || {
+    echo "Error: No Python with tomli found."
+    echo "Install tomli: pip3 install tomli"
+    exit 1
+}
+echo "Using Python: ${PYTHON} ($(${PYTHON} --version))"
 
 # Check virglrenderer
 if ! pkg-config --exists virglrenderer 2>/dev/null; then
@@ -26,20 +44,15 @@ if ! pkg-config --exists virglrenderer 2>/dev/null; then
     exit 1
 fi
 
-# Clean previous build if configure options changed
-if [ -f "${BUILD_DIR_QEMU}/config-host.mak" ]; then
-    if ! grep -q "virgl" "${BUILD_DIR_QEMU}/config-host.mak" 2>/dev/null; then
-        echo "Previous build without virglrenderer found. Cleaning..."
-        rm -rf "${BUILD_DIR_QEMU}"
-    fi
-fi
-
-mkdir -p "${BUILD_DIR_QEMU}"
-cd "${BUILD_DIR_QEMU}"
+# Clean previous build
+rm -rf "${BUILD_DIR}"
+mkdir -p "${BUILD_DIR}"
+cd "${BUILD_DIR}"
 
 echo "Configuring QEMU ${QEMU_VERSION}..."
-"${EXTRACTED}/configure" \
+"${QEMU_SRC}/configure" \
     --prefix="${INSTALL_DIR}" \
+    --python="${PYTHON}" \
     --target-list=x86_64-softmmu \
     --enable-kvm \
     --enable-opengl \

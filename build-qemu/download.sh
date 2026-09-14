@@ -4,26 +4,34 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/versions.conf"
 
-SRC_DIR="${SCRIPT_DIR}/src"
-BUILD_DIR="${SCRIPT_DIR}/build"
-INSTALL_DIR="${SCRIPT_DIR}/install"
+QEMU_DIR="${SCRIPT_DIR}/../qemu-${QEMU_VERSION}"
+QEMU_SYMLINK="${SCRIPT_DIR}/../qemu"
+QEMU_URL="https://download.qemu.org/qemu-${QEMU_VERSION}.tar.xz"
+TMP_DIR="/tmp/qemu-download-$$"
 
-mkdir -p "${SRC_DIR}" "${BUILD_DIR}" "${INSTALL_DIR}"
-
-TARBALL="${SRC_DIR}/qemu-${QEMU_VERSION}.tar.xz"
-EXTRACTED="${SRC_DIR}/qemu-${QEMU_VERSION}"
-
-if [ -d "${EXTRACTED}" ]; then
-    echo "QEMU ${QEMU_VERSION} already extracted at ${EXTRACTED}"
+if [ -d "${QEMU_DIR}" ]; then
+    echo "QEMU ${QEMU_VERSION} source found at: ${QEMU_DIR}"
+    if [ -L "${QEMU_SYMLINK}" ] && [ "$(readlink "${QEMU_SYMLINK}")" = "qemu-${QEMU_VERSION}" ]; then
+        echo "Symlink 'qemu' -> 'qemu-${QEMU_VERSION}' exists."
+    else
+        rm -f "${QEMU_SYMLINK}"
+        echo "Creating symlink: qemu -> qemu-${QEMU_VERSION}"
+        ln -s "qemu-${QEMU_VERSION}" "${QEMU_SYMLINK}"
+    fi
     exit 0
 fi
 
-if [ ! -f "${TARBALL}" ]; then
-    echo "Downloading QEMU ${QEMU_VERSION}..."
-    curl -L -o "${TARBALL}" "${QEMU_URL}"
-fi
+echo "Downloading QEMU ${QEMU_VERSION}..."
+mkdir -p "${TMP_DIR}"
+curl -L "${QEMU_URL}" | tar -xJ -C "${TMP_DIR}"
 
-echo "Extracting QEMU ${QEMU_VERSION}..."
-tar -xf "${TARBALL}" -C "${SRC_DIR}"
+echo "Moving to ${QEMU_DIR}..."
+mv "${TMP_DIR}/qemu-${QEMU_VERSION}" "${QEMU_DIR}"
 
-echo "Done. Source at: ${EXTRACTED}"
+echo "Creating symlink: qemu -> qemu-${QEMU_VERSION}"
+ln -s "qemu-${QEMU_VERSION}" "${QEMU_SYMLINK}"
+
+rm -rf "${TMP_DIR}"
+
+echo ""
+echo "QEMU source ready at: ${QEMU_DIR}"
