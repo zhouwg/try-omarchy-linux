@@ -16,3 +16,7 @@ qemu-11.0.4.tar.xz
 config-temp/
 config.log
 
+# source code of Hyprland & omarchy
+#
+Hyprland/
+omarchy/

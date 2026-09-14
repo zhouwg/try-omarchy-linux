@@ -39,14 +39,20 @@ sudo apt install qemu-kvm
 
 ## Known Limitations
 
-- **Config/About windows black screen**: Omarchy uses GPU-accelerated rendering for certain UI elements (config, about). QEMU 6.2.0 with std-vga doesn't fully support this. Avoid clicking these menu items.
-- **No 3D acceleration**: virglrenderer doesn't work properly with QEMU 6.2.0 on Ubuntu 20.04.
+- **Config/About windows flicker**: Omarchy uses GPU-accelerated rendering for certain UI elements (config, about). QEMU's virtual VGA doesn't fully support this. These menu items may flicker or render incorrectly.
+- **No 3D acceleration**: virglrenderer doesn't work properly on Ubuntu 20.04 with QEMU 11.0.4.
+- **No network**: Network support (slirp/user-mode) is disabled due to library compatibility issues on Ubuntu 20.04.
+
+## Screenshots
+
+<!-- Add screenshots here -->
+
+<img width="1284" height="865" alt="Screenshot from 2026-09-14 11-40-44" src="https://github.com/user-attachments/assets/5b4c38e6-3c7c-4d3a-932b-9d684dc8913f" />
 
 ## Tips
 
 - **Release mouse**: Press `Ctrl+Alt+G`
-- **SSH access**: `ssh -p 2222 user@localhost`
-- **Performance**: KVM is recommended (`sudo apt install qemu-kvm`)
+- **Performance**: KVM is recommended (`sudo apt install qemu-kvm`), doesn't work with VMware Workstation
 
 ## Requirements
 
@@ -58,19 +64,27 @@ sudo apt install qemu-kvm
 
 ```
 try-omarchy-linux/
-├── build-qemu/          # QEMU build scripts
-│   ├── versions.conf    # QEMU version config
-│   ├── download.sh      # Download source
-│   └── build.sh         # Compile QEMU
+├── qemu-11.0.4/           # QEMU source code (forked, with Ubuntu 20.04 patches)
+│   ├── meson.build        # Patched: glib >=2.64.0 (was >=2.66.0)
+│   ├── include/
+│   │   └── glib-compat.h  # Patched: GLIB_VERSION_*_2_64
+│   ├── block/
+│   │   └── nbd.c          # Patched: stubbed nbd_parse_uri (GLib 2.66+ API)
+│   └── ...
+├── qemu -> qemu-11.0.4    # Symlink for convenience
+├── build-qemu/            # Build scripts
+│   ├── versions.conf      # QEMU version config
+│   ├── download.sh        # Download/source management
+│   └── build.sh           # Compile QEMU
 ├── scripts/
-│   ├── setup.sh         # One-click setup
-│   ├── start.sh         # Start VM
-│   ├── create-disk.sh   # Create virtual disk
-│   ├── download-iso.sh  # Download ISO
-│   └── download-ovmf.sh # Download UEFI firmware
-├── ovmf/                # UEFI firmware (after download)
-├── disks/               # Virtual disks (after creation)
-└── iso/                 # ISO files (after download)
+│   ├── setup.sh           # One-click setup
+│   ├── start.sh           # Start VM
+│   ├── create-disk.sh     # Create virtual disk
+│   ├── download-iso.sh    # Download ISO
+│   └── download-ovmf.sh   # Download UEFI firmware
+├── ovmf/                  # UEFI firmware (after download)
+├── disks/                 # Virtual disks (after creation)
+└── iso/                   # ISO files (after download)
 ```
 
 ## License
