@@ -2,6 +2,15 @@
 
 Use Omarchy Linux on Linux via QEMU/KVM
 
+## Why Fork QEMU?
+
+Different Linux distributions ship different versions of QEMU and system libraries. This project maintains a forked QEMU 11.0.4 with patches to minimize host OS dependencies, allowing Omarchy to run on various Linux distributions (Ubuntu 20.04+, Debian, Fedora, etc.) without requiring specific system library versions.
+
+Current patches:
+- **glib compatibility**: Lowered requirement from 2.66 to 2.64 for older distros
+- **GLib URI API**: Stubbed `nbd_parse_uri` to avoid GLib 2.66+ dependency
+- **GCC compatibility**: Fixed missing `errno.h` include for GCC 9
+
 ## Quick Start
 
 ```bash
