@@ -100,6 +100,7 @@ auto_configure() {
 
 # Build QEMU command
 build_command() {
+    SCRIPTS_DIR="${SCRIPT_DIR}"
     QEMU_ARGS=(
         ${KVM_ARGS}
         -m "${RAM}"
@@ -108,6 +109,9 @@ build_command() {
         ${VGA_DEVICE}
         -display "${DISPLAY_OPT}"
         -usb -device usb-tablet
+        # 9p shared folder for transferring files to VM
+        -fsdev "local,id=shared,path=${SCRIPTS_DIR},security_model=mapped-xattr"
+        -device "virtio-9p-pci,fsdev=shared,mount_tag=hostshare"
     )
 
     # UEFI boot

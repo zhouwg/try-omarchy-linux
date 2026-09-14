@@ -11,6 +11,8 @@ Current patches:
 - **GLib URI API**: Stubbed `nbd_parse_uri` to avoid GLib 2.66+ dependency
 - **GCC compatibility**: Fixed missing `errno.h` include for GCC 9
 
+Additionally, Omarchy has been patched to detect QEMU/KVM virtual machines and automatically enable software rendering (LLVMpipe) for compatibility.
+
 ## Quick Start
 
 ```bash
@@ -33,8 +35,27 @@ sudo apt install qemu-kvm
 # Start from ISO (install to disk)
 ./scripts/start.sh --iso ./iso/omarchy-4.0.3.iso
 
+# After installation, apply all QEMU patches (rendering + keybindings)
+# Mount shared folder in VM: sudo mount -t 9p -o trans=virtio hostshare /mnt/hostshare
+# Then run: /mnt/hostshare/patch-qemu-all.sh
+
 # Boot installed system
 ./scripts/start.sh
+```
+
+## Shared Folder
+
+The `scripts/` directory is automatically shared to the VM via 9p. Inside the VM:
+
+```bash
+# Mount the shared folder
+sudo mount -t 9p -o trans=virtio hostshare /mnt/hostshare
+
+# Apply all patches (rendering + keybindings)
+/mnt/hostshare/patch-qemu-all.sh
+
+# Reboot
+sudo reboot
 ```
 
 ## Options
