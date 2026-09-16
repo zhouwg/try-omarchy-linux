@@ -3,22 +3,25 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ISO_DIR="${SCRIPT_DIR}/../iso"
-ISO_FILE="${ISO_DIR}/omarchy-4.0.3.iso"
 ISO_URL="https://iso.omarchy.org/omarchy-4.0.3.iso"
 
 mkdir -p "${ISO_DIR}"
 
-if [ -f "${ISO_FILE}" ]; then
-    echo "ISO already exists: ${ISO_FILE}"
+# Check if any omarchy ISO already exists
+EXISTING_ISO=$(find "${ISO_DIR}" -maxdepth 1 -name "omarchy-*.iso" -type f | head -1)
+if [ -n "${EXISTING_ISO}" ]; then
+    echo "ISO already exists: ${EXISTING_ISO}"
+    echo "Skip download. To re-download, delete it first."
     exit 0
 fi
 
 echo "Downloading Omarchy ISO..."
 echo "  URL: ${ISO_URL}"
-echo "  Destination: ${ISO_FILE}"
+echo "  Destination: ${ISO_DIR}"
 echo ""
 
-wget --show-progress -O "${ISO_FILE}" "${ISO_URL}"
+wget --show-progress -P "${ISO_DIR}" "${ISO_URL}"
 
+DOWNLOADED_ISO=$(find "${ISO_DIR}" -maxdepth 1 -name "omarchy-*.iso" -type f | head -1)
 echo ""
-echo "Download complete: ${ISO_FILE}"
+echo "Download complete: ${DOWNLOADED_ISO}"

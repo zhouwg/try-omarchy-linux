@@ -2,7 +2,11 @@
 set -euo pipefail
 
 # This script applies software rendering patches for QEMU VM compatibility.
-# It automatically mounts the shared folder and applies patches.
+# Run this inside the VM after installation.
+#
+# Prerequisites:
+#   sudo mount -t 9p -o trans=virtio hostshare /mnt/hostshare
+#   /mnt/hostshare/patch-qemu-rendering.sh
 
 echo ""
 echo "  Omarchy QEMU Software Rendering Patch"
@@ -10,40 +14,28 @@ echo ""
 
 # Detect if running in a VM
 detect_vm() {
-    if command -v systemd-detect-virt &>/dev/null; then
-        local virt=$(systemd-detect-virt 2>/dev/null)
-        if echo "$virt" | grep -qiE "qemu|kvm|vm"; then
-            return 0
-        fi
+    if command -v systemd-detect-virt >/dev/null 2>&1; then
+        virt=$(systemd-detect-virt 2>/dev/null || true)
+        case "$virt" in
+            qemu|kvm|vmware|virtualbox|oracle*)
+                return 0
+                ;;
+        esac
     fi
     if [ -f /sys/class/dmi/id/product_name ]; then
-        local product=$(cat /sys/class/dmi/id/product_name 2>/dev/null)
-        if echo "$product" | grep -qiE "QEMU|Standard PC"; then
-            return 0
-        fi
+        product=$(cat /sys/class/dmi/id/product_name 2>/dev/null || true)
+        case "$product" in
+            *QEMU*|*"Standard PC"*)
+                return 0
+                ;;
+        esac
     fi
     return 1
 }
 
-if ! detect_vm(); then
+if ! detect_vm; then
     echo "Not running in a VM. Skipping patches."
     exit 0
-fi
-
-# Try to mount shared folder if not already mounted
-MOUNT_POINT="/mnt/hostshare"
-if ! mountpoint -q "$MOUNT_POINT" 2>/dev/null; then
-    echo "Mounting shared folder..."
-    sudo mkdir -p "$MOUNT_POINT"
-    sudo mount -t 9p -o trans=virtio hostshare "$MOUNT_POINT" 2>/dev/null || true
-fi
-
-# Find the patch source - either from shared folder or local
-PATCH_SOURCE=""
-if [ -f "$MOUNT_POINT/patch-qemu-rendering.sh" ]; then
-    PATCH_SOURCE="$MOUNT_POINT"
-elif [ -f "$(dirname "$0")/omarchy/default/hypr/envs.lua" ]; then
-    PATCH_SOURCE="$(dirname "$0")"
 fi
 
 # Find Hyprland envs.lua

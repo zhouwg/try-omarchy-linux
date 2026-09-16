@@ -3,6 +3,10 @@ set -euo pipefail
 
 # Comprehensive QEMU patch script for Omarchy
 # Applies: software rendering + QEMU-friendly keybindings
+#
+# Prerequisites: Run this inside the VM after mounting shared folder:
+#   sudo mount -t 9p -o trans=virtio hostshare /mnt/hostshare
+#   /mnt/hostshare/patch-qemu-all.sh
 
 echo ""
 echo "  =================================="
@@ -12,32 +16,28 @@ echo ""
 
 # Detect if running in a VM
 detect_vm() {
-    if command -v systemd-detect-virt &>/dev/null; then
-        local virt=$(systemd-detect-virt 2>/dev/null)
-        if echo "$virt" | grep -qiE "qemu|kvm|vm"; then
-            return 0
-        fi
+    if command -v systemd-detect-virt >/dev/null 2>&1; then
+        virt=$(systemd-detect-virt 2>/dev/null || true)
+        case "$virt" in
+            qemu|kvm|vmware|virtualbox|oracle*)
+                return 0
+                ;;
+        esac
     fi
     if [ -f /sys/class/dmi/id/product_name ]; then
-        local product=$(cat /sys/class/dmi/id/product_name 2>/dev/null)
-        if echo "$product" | grep -qiE "QEMU|Standard PC"; then
-            return 0
-        fi
+        product=$(cat /sys/class/dmi/id/product_name 2>/dev/null || true)
+        case "$product" in
+            *QEMU*|*"Standard PC"*)
+                return 0
+                ;;
+        esac
     fi
     return 1
 }
 
-if ! detect_vm(); then
+if ! detect_vm; then
     echo "Not running in a VM. Skipping patches."
     exit 0
-fi
-
-# Try to mount shared folder if not already mounted
-MOUNT_POINT="/mnt/hostshare"
-if ! mountpoint -q "$MOUNT_POINT" 2>/dev/null; then
-    echo "Mounting shared folder..."
-    sudo mkdir -p "$MOUNT_POINT"
-    sudo mount -t 9p -o trans=virtio hostshare "$MOUNT_POINT" 2>/dev/null || true
 fi
 
 # ============================================
@@ -56,7 +56,7 @@ if grep -q "detect_vm" "$ENVS_FILE" 2>/dev/null; then
     echo "  Software rendering already patched."
 else
     cp "$ENVS_FILE" "${ENVS_FILE}.bak"
-    cat >> "$ENVS_FILE" << 'RENDERING'
+    cat >> "$ENVS_FILE" << 'PATCH'
 
 -- VM detection and software rendering (added by try-omarchy-linux)
 local function detect_vm()
@@ -86,7 +86,7 @@ if detect_vm() then
   hl.env("QT_QUICK_BACKEND", "software")
   hl.env("GSK_RENDERER", "software")
 end
-RENDERING
+PATCH
     echo "  Software rendering patch applied."
 fi
 

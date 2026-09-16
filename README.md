@@ -23,6 +23,20 @@ sudo apt install qemu-kvm
 ./scripts/setup.sh
 
 # Start Omarchy
+./scripts/install.sh
+./scripts/start.sh
+```
+
+### Manual Setup
+
+If you prefer to build QEMU separately:
+
+```bash
+# Build QEMU only
+./build-qemu/setup.sh
+
+# Then use scripts
+./scripts/install.sh
 ./scripts/start.sh
 ```
 
@@ -32,12 +46,18 @@ sudo apt install qemu-kvm
 # First time: run setup
 ./scripts/setup.sh
 
-# Start from ISO (install to disk)
-./scripts/start.sh --iso ./iso/omarchy-4.0.3.iso
+# Install Omarchy from ISO
+./scripts/install.sh
 
-# After installation, apply all QEMU patches (rendering + keybindings)
-# Mount shared folder in VM: sudo mount -t 9p -o trans=virtio hostshare /mnt/hostshare
-# Then run: /mnt/hostshare/patch-qemu-all.sh
+# After installation, apply QEMU patches inside the VM:
+# 1. Mount shared folder
+sudo mount -t 9p -o trans=virtio hostshare /mnt/hostshare
+
+# 2. Run patch script
+/mnt/hostshare/patch-qemu-all.sh
+
+# 3. Reboot
+sudo reboot
 
 # Boot installed system
 ./scripts/start.sh
@@ -45,24 +65,46 @@ sudo apt install qemu-kvm
 
 ## Shared Folder
 
-The `scripts/` directory is automatically shared to the VM via 9p. Inside the VM:
+The `scripts/` directory is automatically shared to the VM via 9p. To access it inside the VM:
+
+### Switch to Terminal
+
+From the QEMU monitor (press `Ctrl+Alt+G` to release mouse, then click **Machine > QEMU Monitor**), run:
+
+```
+sendkey ctrl-alt-f2
+```
+
+This switches to a TTY terminal. Log in and mount the shared folder:
 
 ```bash
 # Mount the shared folder
+sudo mkdir -p /mnt/hostshare
 sudo mount -t 9p -o trans=virtio hostshare /mnt/hostshare
 
 # Apply all patches (rendering + keybindings)
 /mnt/hostshare/patch-qemu-all.sh
 
-# Reboot
+# Switch back to graphical desktop
 sudo reboot
 ```
 
+After reboot, press `F12` to open terminal in the desktop.
+
 ## Options
 
+### install.sh
 ```
-  --iso PATH    Path to Omarchy ISO file
-  --ram SIZE    RAM size (default: 4G)
+  --iso PATH      Path to Omarchy ISO (auto-detected from iso/ dir if not specified)
+  --ram SIZE      RAM size (default: 16G)
+  --cpus N        Number of CPUs (default: 4)
+  --disk-size SIZE Disk size (default: 16G)
+  --uefi          Use UEFI boot (requires OVMF)
+```
+
+### start.sh
+```
+  --ram SIZE    RAM size (default: 16G)
   --cpus N      Number of CPUs (default: 4)
   --uefi        Use UEFI boot (requires OVMF)
 ```
@@ -78,6 +120,12 @@ sudo reboot
 <!-- Add screenshots here -->
 
 <img width="1284" height="865" alt="Screenshot from 2026-09-14 11-40-44" src="https://github.com/user-attachments/assets/5b4c38e6-3c7c-4d3a-932b-9d684dc8913f" />
+
+
+<img width="1409" height="985" alt="Image" src="https://github.com/user-attachments/assets/84abccb6-f9f9-4fe0-a6e3-adfc5a4f75a9" />
+
+
+<img width="1409" height="985" alt="Image" src="https://github.com/user-attachments/assets/f28756a3-4452-4bf1-a24b-d98ff9fa33e8" />
 
 ## Tips
 
@@ -108,10 +156,14 @@ try-omarchy-linux/
 │   └── build.sh           # Compile QEMU
 ├── scripts/
 │   ├── setup.sh           # One-click setup
-│   ├── start.sh           # Start VM
+│   ├── install.sh         # Install Omarchy from ISO
+│   ├── start.sh           # Boot installed system
 │   ├── create-disk.sh     # Create virtual disk
 │   ├── download-iso.sh    # Download ISO
-│   └── download-ovmf.sh   # Download UEFI firmware
+│   ├── download-ovmf.sh   # Download UEFI firmware
+│   ├── patch-qemu-all.sh  # Apply all QEMU patches (run inside VM)
+│   ├── patch-qemu-rendering.sh  # Software rendering patch
+│   └── patch-qemu-keybinds.sh   # Keybindings patch
 ├── ovmf/                  # UEFI firmware (after download)
 ├── disks/                 # Virtual disks (after creation)
 └── iso/                   # ISO files (after download)

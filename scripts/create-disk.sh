@@ -6,7 +6,7 @@ QEMU_IMG="${SCRIPT_DIR}/../build-qemu/install/bin/qemu-img"
 DISK_DIR="${SCRIPT_DIR}/../disks"
 DISK_FILE="${DISK_DIR}/omarchy.qcow2"
 #DISK_SIZE="20G"
-DISK_SIZE="8G"
+DISK_SIZE="16G"
 
 mkdir -p "${DISK_DIR}"
 
