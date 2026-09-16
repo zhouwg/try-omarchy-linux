@@ -42,7 +42,8 @@ sudo apt-get install -y \
     libglib2.0-dev \
     libfdt-dev \
     libpixman-1-dev \
-    zlib1g-dev
+    zlib1g-dev \
+    libslirp-dev
 
 # GTK display (default)
 sudo apt-get install -y libgtk-3-dev

@@ -125,6 +125,10 @@ build_command() {
         ${VGA_DEVICE}
         -display "${DISPLAY_OPT}"
         -usb -device usb-tablet
+        # Network (user mode with SSH forwarding)
+        -netdev "user,id=net0,hostfwd=tcp::2222-:22"
+        -device "virtio-net-pci,netdev=net0"
+        # Shared folder
         -fsdev "local,id=shared,path=${SCRIPTS_DIR},security_model=mapped-xattr"
         -device "virtio-9p-pci,fsdev=shared,mount_tag=hostshare"
     )

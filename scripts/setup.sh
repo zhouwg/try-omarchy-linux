@@ -13,12 +13,11 @@ echo ""
 echo "  One-time setup"
 echo ""
 
-# Step 1: Build QEMU
+# Step 1: Install dependencies and build QEMU
 QEMU_BIN="${PROJECT_DIR}/build-qemu/install/bin/qemu-system-x86_64"
 if [ ! -f "${QEMU_BIN}" ]; then
-    echo "[1/3] Building QEMU..."
-    "${PROJECT_DIR}/build-qemu/download.sh"
-    "${PROJECT_DIR}/build-qemu/build.sh"
+    echo "[1/3] Installing dependencies and building QEMU..."
+    "${PROJECT_DIR}/build-qemu/setup.sh"
 else
     echo "[1/3] QEMU already built, skipping..."
 fi
@@ -44,6 +43,7 @@ fi
 echo ""
 echo "Setup complete!"
 echo ""
-echo "Start Omarchy with:"
+echo "Install and start Omarchy with:"
+echo "  ./scripts/install.sh"
 echo "  ./scripts/start.sh"
 echo ""

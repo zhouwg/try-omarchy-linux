@@ -8,8 +8,8 @@ DISK_FILE="${DISK_DIR}/omarchy.qcow2"
 OVMF_DIR="${SCRIPT_DIR}/../ovmf"
 
 # Defaults
-RAM="16G"
-CPUS="4"
+RAM="4G"
+CPUS="2"
 DISPLAY_OPT="gtk"
 UEFI=""
 
@@ -89,8 +89,8 @@ auto_configure() {
     VGA_DEVICE="-device VGA,vgamem_mb=512"
 }
 
-# Build QEMU command
-build_command() {
+# launch QEMU command
+launch_command() {
     SCRIPTS_DIR="${SCRIPT_DIR}"
     QEMU_ARGS=(
         ${KVM_ARGS}
@@ -100,6 +100,10 @@ build_command() {
         ${VGA_DEVICE}
         -display "${DISPLAY_OPT}"
         -usb -device usb-tablet
+        # Network (user mode with SSH forwarding)
+        -netdev "user,id=net0,hostfwd=tcp::2222-:22"
+        -device "virtio-net-pci,netdev=net0"
+        # Shared folder
         -fsdev "local,id=shared,path=${SCRIPTS_DIR},security_model=mapped-xattr"
         -device "virtio-9p-pci,fsdev=shared,mount_tag=hostshare"
     )
@@ -135,7 +139,7 @@ main() {
         exit 1
     fi
 
-    build_command
+    launch_command
 
     echo ""
     echo "  Omarchy Linux"
@@ -143,6 +147,9 @@ main() {
     echo ""
     echo "  RAM: ${RAM}  CPUs: ${CPUS}  Display: ${DISPLAY_OPT}"
     echo "  Disk: ${DISK_FILE}"
+    echo ""
+    echo "  QEMU command:"
+    echo "  ${QEMU} ${QEMU_ARGS[*]}"
     echo ""
 
     exec "${QEMU}" "${QEMU_ARGS[@]}"

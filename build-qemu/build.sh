@@ -58,7 +58,7 @@ echo "Configuring QEMU ${QEMU_VERSION}..."
     --enable-opengl \
     --enable-virglrenderer \
     --enable-gtk \
-    --disable-slirp \
+    --enable-slirp \
     --disable-sdl \
     --disable-docs \
     --disable-user \
