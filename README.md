@@ -70,7 +70,6 @@ ssh -p 2222 omarchy_vm_username@localhost
 
 ## Known Limitations
 
-- **No 3D acceleration**: virglrenderer and virtio-gpu-pci in QEMU 11.0.4 don't work properly with Omarchy.
 - Only verified on Ubuntu 20.04 & Ubuntu 26.04
 - Only support KVM + QEMU, doesn't work with VMware Workstation
 

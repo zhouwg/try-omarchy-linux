@@ -8,8 +8,8 @@ DISK_FILE="${DISK_DIR}/omarchy.qcow2"
 OVMF_DIR="${SCRIPT_DIR}/../ovmf"
 
 # Defaults
-RAM="4G"
-CPUS="2"
+RAM="16G"
+CPUS="4"
 DISPLAY_OPT="gtk"
 UEFI=""
 
@@ -86,7 +86,7 @@ EOF
 # Auto-detect best settings
 auto_configure() {
     DISPLAY_OPT="gtk"
-    VGA_DEVICE="-device VGA,vgamem_mb=512"
+    VGA_DEVICE="-device virtio-vga,xres=1280,yres=1024"
 }
 
 # launch QEMU command
@@ -96,6 +96,7 @@ launch_command() {
         ${KVM_ARGS}
         -m "${RAM}"
         -smp "${CPUS}"
+        -smbios type=4,max-speed=4900
         -drive "file=${DISK_FILE},format=qcow2,if=virtio"
         ${VGA_DEVICE}
         -display "${DISPLAY_OPT}"
