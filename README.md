@@ -1,6 +1,7 @@
 # try-omarchy-linux
 
-Use Omarchy Linux on Linux via QEMU/KVM
+
+Try Omarchy on Ubuntu 26.04 with a minimal setup via QEMU/KVM
 
 ## Why Fork QEMU?
 
@@ -71,7 +72,7 @@ ssh -p 2222 omarchy_vm_username@localhost
 ## Known Limitations
 
 - Only verified on Ubuntu 20.04 & Ubuntu 26.04
-- Only support KVM + QEMU, doesn't work with VMware Workstation
+- Only verified with KVM + QEMU
 
 ## Screenshots
 
