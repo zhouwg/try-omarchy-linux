@@ -1,7 +1,6 @@
 # try-omarchy-linux
 
-
-Try Omarchy on Ubuntu 26.04 with a minimal setup via QEMU/KVM
+Try Omarchy and other Linux distributions inside QEMU virtual machines using a minimal setup.
 
 ## Why Fork QEMU?
 
