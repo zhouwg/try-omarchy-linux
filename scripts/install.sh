@@ -182,6 +182,7 @@ main() {
     ISO="${PROJECT_ROOT_PATH}/iso/ubuntu-26.04-desktop-amd64.iso"
     ISO="${PROJECT_ROOT_PATH}/iso/deepin-desktop-community-25.2.0-amd64.iso"
     ISO="${PROJECT_ROOT_PATH}/iso/omarchy-4.0.6.iso"
+    ISO="${PROJECT_ROOT_PATH}/iso/omarchy-4.5.0-x86.iso"
 
     # Require ISO for installation
     if [ -z "${ISO}" ]; then
